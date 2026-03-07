@@ -1,0 +1,326 @@
+[
+	{
+		"data": {
+			"prompt": "Add a task: Buy groceries",
+			"tools": ["addTask"]
+		},
+		"target": {
+			"expectedTools": ["addTask"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Simple add task - should use addTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Remind me to call mom tomorrow",
+			"tools": ["addTask", "dateTime"]
+		},
+		"target": {
+			"expectedTools": ["addTask"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Add task with implied due date - should use addTask, optionally dateTime"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Add a high priority task: Fix production bug",
+			"tools": ["addTask"]
+		},
+		"target": {
+			"expectedTools": ["addTask"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Add task with priority - should use addTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "What tasks do I have?",
+			"tools": ["listTasks"]
+		},
+		"target": {
+			"expectedTools": ["listTasks"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "List all tasks - should use listTasks"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Show me my todo list",
+			"tools": ["listTasks"]
+		},
+		"target": {
+			"expectedTools": ["listTasks"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "List tasks - should use listTasks"
+		}
+	},
+	{
+		"data": {
+			"prompt": "List my high priority tasks",
+			"tools": ["listTasks"]
+		},
+		"target": {
+			"expectedTools": ["listTasks"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "List with priority filter - should use listTasks"
+		}
+	},
+	{
+		"data": {
+			"prompt": "What's in progress?",
+			"tools": ["listTasks"]
+		},
+		"target": {
+			"expectedTools": ["listTasks"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "List in-progress tasks - should use listTasks"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Mark task 3 as done",
+			"tools": ["updateTaskStatus"]
+		},
+		"target": {
+			"expectedTools": ["updateTaskStatus"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Update status to done - should use updateTaskStatus"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Start working on task 5",
+			"tools": ["updateTaskStatus"]
+		},
+		"target": {
+			"expectedTools": ["updateTaskStatus"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Mark as in progress - should use updateTaskStatus"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Change the title of task 2 to 'Review PR'",
+			"tools": ["updateTask"]
+		},
+		"target": {
+			"expectedTools": ["updateTask"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Update task details - should use updateTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Set the due date of task 1 to 2025-12-31",
+			"tools": ["updateTask"]
+		},
+		"target": {
+			"expectedTools": ["updateTask"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Update due date - should use updateTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Delete task 4",
+			"tools": ["deleteTask"]
+		},
+		"target": {
+			"expectedTools": ["deleteTask"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Explicit delete - should use deleteTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Remove task 7 from my list",
+			"tools": ["deleteTask"]
+		},
+		"target": {
+			"expectedTools": ["deleteTask"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Remove task - should use deleteTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Find tasks about deployment",
+			"tools": ["searchTasks"]
+		},
+		"target": {
+			"expectedTools": ["searchTasks"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Search by keyword - should use searchTasks"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Search for work-related tasks",
+			"tools": ["searchTasks", "listTasks"]
+		},
+		"target": {
+			"expectedTools": ["searchTasks"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Search - should use searchTasks (tag filter could use listTasks)"
+		}
+	},
+	{
+		"data": {
+			"prompt": "How many tasks are in my memory?",
+			"tools": ["getMemoryInfo"]
+		},
+		"target": {
+			"expectedTools": ["getMemoryInfo"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "DB stats - should use getMemoryInfo"
+		}
+	},
+	{
+		"data": {
+			"prompt": "What's the current date?",
+			"tools": ["dateTime"]
+		},
+		"target": {
+			"expectedTools": ["dateTime"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Current time - should use dateTime"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Add a task due next Monday",
+			"tools": ["addTask", "dateTime"]
+		},
+		"target": {
+			"expectedTools": ["addTask", "dateTime"],
+			"category": "golden"
+		},
+		"metadata": {
+			"description": "Add task with relative date - should use dateTime then addTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Can you add a task for me?",
+			"tools": ["addTask"]
+		},
+		"target": {
+			"expectedTools": ["addTask"],
+			"category": "secondary"
+		},
+		"metadata": {
+			"description": "Vague add request - likely needs clarification or addTask"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Show me what I need to do",
+			"tools": ["listTasks"]
+		},
+		"target": {
+			"expectedTools": ["listTasks"],
+			"category": "secondary"
+		},
+		"metadata": {
+			"description": "Implicit list - should use listTasks"
+		}
+	},
+	{
+		"data": {
+			"prompt": "What is a task management system?",
+			"tools": []
+		},
+		"target": {
+			"forbiddenTools": [
+				"addTask",
+				"listTasks",
+				"updateTaskStatus",
+				"updateTask",
+				"deleteTask",
+				"searchTasks",
+				"getMemoryInfo"
+			],
+			"category": "negative"
+		},
+		"metadata": {
+			"description": "General knowledge - should NOT use any task tools"
+		}
+	},
+	{
+		"data": {
+			"prompt": "Explain how SQLite works",
+			"tools": []
+		},
+		"target": {
+			"forbiddenTools": [
+				"addTask",
+				"listTasks",
+				"updateTaskStatus",
+				"updateTask",
+				"deleteTask",
+				"searchTasks",
+				"getMemoryInfo"
+			],
+			"category": "negative"
+		},
+		"metadata": {
+			"description": "Technical explanation - should NOT use task tools"
+		}
+	},
+	{
+		"data": {
+			"prompt": "What's the weather like today?",
+			"tools": []
+		},
+		"target": {
+			"forbiddenTools": [
+				"addTask",
+				"listTasks",
+				"updateTaskStatus",
+				"updateTask",
+				"deleteTask",
+				"searchTasks",
+				"getMemoryInfo",
+				"dateTime"
+			],
+			"category": "negative"
+		},
+		"metadata": {
+			"description": "Unrelated question - should NOT use any tools (no weather tool)"
+		}
+	}
+]
