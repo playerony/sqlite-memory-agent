@@ -1,19 +1,10 @@
 import type { ModelMessage } from "ai";
 
-/**
- * Estimate token count from text using simple character division.
- * Uses 3.75 as the divisor (midpoint of 3.5-4 range).
- * This is an approximation - not exact tokenization.
- */
-export function estimateTokens(text: string): number {
+export const estimateTokens = (text: string): number => {
 	return Math.ceil(text.length / 3.75);
-}
+};
 
-/**
- * Extract text content from a message.
- * Handles different message content formats (string, array, objects).
- */
-export function extractMessageText(message: ModelMessage): string {
+export const extractMessageText = (message: ModelMessage): string => {
 	if (typeof message.content === "string") {
 		return message.content;
 	}
@@ -35,14 +26,14 @@ export function extractMessageText(message: ModelMessage): string {
 						return output.value;
 					}
 				}
-				// Fallback: stringify the part
+
 				return JSON.stringify(part);
 			})
 			.join(" ");
 	}
 
 	return JSON.stringify(message.content);
-}
+};
 
 export interface TokenUsage {
 	input: number;
@@ -50,10 +41,6 @@ export interface TokenUsage {
 	total: number;
 }
 
-/**
- * Estimate token counts for an array of messages.
- * Separates input (user, system, tool) from output (assistant) tokens.
- */
 export function estimateMessagesTokens(messages: ModelMessage[]): TokenUsage {
 	let input = 0;
 	let output = 0;
@@ -65,7 +52,6 @@ export function estimateMessagesTokens(messages: ModelMessage[]): TokenUsage {
 		if (message.role === "assistant") {
 			output += tokens;
 		} else {
-			// system, user, tool messages count as input
 			input += tokens;
 		}
 	}

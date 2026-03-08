@@ -19,9 +19,6 @@ export const getDb = (): DatabaseSync => {
 
 	_db = new DatabaseSync(DB_PATH);
 
-	// Enable WAL mode for better concurrency
-	_db.exec("PRAGMA journal_mode = WAL;");
-
 	// Create tasks table
 	_db.exec(`
     CREATE TABLE IF NOT EXISTS tasks (

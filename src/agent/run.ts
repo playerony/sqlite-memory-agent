@@ -1,38 +1,82 @@
 import "dotenv/config";
-import { generateText, streamText, type ModelMessage } from "ai";
+import { streamText, type ModelMessage } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { SYSTEM_PROMPT } from "./system/prompt.js";
 import type { AgentCallbacks, ToolCallInfo } from "../types.js";
 import { tools } from "./tools/index.js";
-import { executeTool } from "./executeTool.js";
+import { Laminar, getTracer } from "@lmnr-ai/lmnr";
 
 import { filterCompatibleMessages } from "./system/filterMessages.js";
+import {
+	calculateUsagePercentage,
+	compactConversation,
+	estimateMessagesTokens,
+	getModelLimits,
+	isOverThreshold,
+} from "./context";
+import { DEFAULT_MODEL_ID, DEFAULT_THRESHOLD } from "../config.js";
+
+Laminar.initialize({
+	projectApiKey: process.env.LMNR_PROJECT_API_KEY,
+});
 
 export const runAgent = async (
 	userMessage: string,
 	conversationHistory: ModelMessage[],
-	callbacks?: AgentCallbacks,
+	callbacks: AgentCallbacks,
 ) => {
-	const workingHistory = filterCompatibleMessages(conversationHistory);
-	const messages: ModelMessage[] = [
-		{
-			role: "system",
-			content: SYSTEM_PROMPT,
-		},
+	const modelLimits = getModelLimits(DEFAULT_MODEL_ID);
+
+	let workingHistory = filterCompatibleMessages(conversationHistory);
+	const preCheckTokens = estimateMessagesTokens([
+		{ role: "system", content: SYSTEM_PROMPT },
 		...workingHistory,
-		{
-			role: "user",
-			content: userMessage,
-		},
+		{ role: "user", content: userMessage },
+	]);
+
+	if (isOverThreshold(preCheckTokens.total, modelLimits.contextWindow)) {
+		workingHistory = await compactConversation(
+			workingHistory,
+			DEFAULT_MODEL_ID,
+		);
+	}
+
+	const messages: ModelMessage[] = [
+		{ role: "system", content: SYSTEM_PROMPT },
+		...workingHistory,
+		{ role: "user", content: userMessage },
 	];
 
 	let fullResponse = "";
 
+	const reportTokenUsage = () => {
+		if (callbacks.onTokenUsage) {
+			const usage = estimateMessagesTokens(messages);
+			callbacks.onTokenUsage({
+				inputTokens: usage.input,
+				outputTokens: usage.output,
+				totalTokens: usage.total,
+				contextWindow: modelLimits.contextWindow,
+				threshold: DEFAULT_THRESHOLD,
+				percentage: calculateUsagePercentage(
+					usage.total,
+					modelLimits.contextWindow,
+				),
+			});
+		}
+	};
+
+	reportTokenUsage();
+
 	while (true) {
 		const result = streamText({
-			model: anthropic("claude-3-5-haiku-20241022"),
+			model: anthropic(DEFAULT_MODEL_ID),
 			messages,
 			tools,
+			experimental_telemetry: {
+				isEnabled: true,
+				tracer: getTracer(),
+			},
 		});
 
 		const toolCalls: ToolCallInfo[] = [];
@@ -43,7 +87,7 @@ export const runAgent = async (
 			for await (const chunk of result.fullStream) {
 				if (chunk.type === "text-delta") {
 					currentText += chunk.text;
-					callbacks?.onToken(chunk.text);
+					callbacks.onToken(chunk.text);
 				}
 
 				if (chunk.type === "tool-call") {
@@ -53,7 +97,7 @@ export const runAgent = async (
 						toolName: chunk.toolName,
 						args: input as Record<string, unknown>,
 					});
-					callbacks?.onToolCallStart(chunk.toolName, input);
+					callbacks.onToolCallStart(chunk.toolName, input);
 				}
 			}
 		} catch (error) {
@@ -67,42 +111,29 @@ export const runAgent = async (
 		}
 
 		fullResponse += currentText;
-		callbacks?.onToken(currentText);
 
 		if (streamError && !currentText) {
-			fullResponse = "Sorry, I encountered an error. Please try again.";
-			callbacks?.onToken(fullResponse);
+			fullResponse =
+				"I apologize, but I wasn't able to generate a response. Could you please try rephrasing your message?";
+			callbacks.onToken(fullResponse);
 			break;
 		}
 
 		const finishReason = await result.finishReason;
-		if (finishReason !== "tool-calls" && toolCalls.length === 0) {
+
+		if (finishReason !== "tool-calls" || toolCalls.length === 0) {
 			const responseMessages = await result.response;
 			messages.push(...responseMessages.messages);
+			reportTokenUsage();
 			break;
 		}
 
 		const responseMessages = await result.response;
 		messages.push(...responseMessages.messages);
-
-		for (const toolCall of toolCalls) {
-			const toolResult = await executeTool(toolCall.toolName, toolCall.args);
-			callbacks?.onToolCallEnd(toolCall.toolName, toolResult);
-
-			messages.push({
-				role: "tool",
-				content: [
-					{
-						type: "tool-result",
-						toolCallId: toolCall.toolCallId,
-						toolName: toolCall.toolName,
-						output: { type: "text", value: toolResult },
-					},
-				],
-			});
-		}
+		reportTokenUsage();
 	}
 
-	callbacks?.onComplete(fullResponse);
+	callbacks.onComplete(fullResponse);
+
 	return messages;
 };

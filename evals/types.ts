@@ -1,5 +1,3 @@
-import type { ModelMessage } from "ai";
-
 /**
  * Input data for single-turn tool selection evaluations.
  * Tests whether the LLM selects the correct tools without executing them.

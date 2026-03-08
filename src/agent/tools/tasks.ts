@@ -27,19 +27,23 @@ export const addTask = tool({
 			.describe('Optional comma-separated tags, e.g. "work,urgent"'),
 	}),
 	execute: async ({ title, description, priority, due_date, tags }) => {
-		const db = getDb();
-		const stmt = db.prepare(`
-      INSERT INTO tasks (title, description, priority, due_date, tags)
-      VALUES (?, ?, ?, ?, ?)
-    `);
-		const result = stmt.run(
-			title,
-			description ?? null,
-			priority ?? "medium",
-			due_date ?? null,
-			tags ?? null,
-		);
-		return `✅ Task added (id=${result.lastInsertRowid}): "${title}" [${priority ?? "medium"}]`;
+		try {
+			const db = getDb();
+			const stmt = db.prepare(`
+				INSERT INTO tasks (title, description, priority, due_date, tags)
+				VALUES (?, ?, ?, ?, ?)
+			`);
+			const result = stmt.run(
+				title,
+				description ?? null,
+				priority ?? "medium",
+				due_date ?? null,
+				tags ?? null,
+			);
+			return `✅ Task added (id=${result.lastInsertRowid}): "${title}" [${priority ?? "medium"}]`;
+		} catch (error) {
+			return `❌ Error adding task: ${error}`;
+		}
 	},
 });
 
@@ -88,7 +92,7 @@ export const listTasks = tool({
 		}
 
 		query +=
-			' ORDER BY CASE priority WHEN "high" THEN 1 WHEN "medium" THEN 2 ELSE 3 END, created_at DESC';
+			" ORDER BY CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END, created_at DESC";
 		query += " LIMIT ?";
 		params.push(limit ?? 50);
 
