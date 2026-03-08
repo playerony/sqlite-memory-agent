@@ -8,13 +8,13 @@ export const DEFAULT_MODEL_LIMITS: ModelLimits = {
 };
 
 const AVAILABLE_MODEL_IDS: AnthropicMessagesModelId[] = [
-	"claude-opus-4-0",
+	"claude-haiku-4-5-20251001",
 ] as const;
 
 export const MODEL_LIMITS: Partial<
 	Record<AnthropicMessagesModelId, ModelLimits>
 > = {
-	"claude-opus-4-0": {
+	"claude-haiku-4-5-20251001": {
 		inputLimit: 136000,
 		outputLimit: 64000,
 		contextWindow: 200000,

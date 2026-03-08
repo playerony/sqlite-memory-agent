@@ -13,7 +13,6 @@ export function TokenUsage({ usage }: TokenUsageProps) {
 	const thresholdPercent = Math.round(usage.threshold * 100);
 	const usagePercent = usage.percentage.toFixed(1);
 
-	// Determine color based on usage
 	let color: string = "green";
 	if (usage.percentage >= usage.threshold * 100) {
 		color = "red";
@@ -28,7 +27,11 @@ export function TokenUsage({ usage }: TokenUsageProps) {
 				<Text color={color} bold>
 					{usagePercent}%
 				</Text>
-				<Text dimColor> (threshold: {thresholdPercent}%)</Text>
+				<Text dimColor>
+					{" "}
+					(threshold: {thresholdPercent}%, tokens used: {usage.totalTokens}/
+					{usage.contextWindow})
+				</Text>
 			</Text>
 		</Box>
 	);
