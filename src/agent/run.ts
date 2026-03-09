@@ -2,6 +2,7 @@ import "dotenv/config";
 import { streamText, type ModelMessage } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { SYSTEM_PROMPT } from "./system/prompt.js";
+
 import type { AgentCallbacks, ToolCallInfo } from "../types.js";
 import { tools } from "./tools/index.js";
 import { Laminar, getTracer } from "@lmnr-ai/lmnr";
@@ -15,10 +16,25 @@ import {
 	isOverThreshold,
 } from "./context";
 import { DEFAULT_MODEL_ID, DEFAULT_THRESHOLD } from "../config.js";
+import { executeTool } from "./executeTool.js";
 
 Laminar.initialize({
 	projectApiKey: process.env.LMNR_PROJECT_API_KEY,
 });
+
+const getMessages = (
+	userMessage: string,
+	conversationHistory: ModelMessage[],
+): ModelMessage[] => {
+	if (conversationHistory.length === 0) {
+		return [
+			{ role: "system", content: SYSTEM_PROMPT },
+			{ role: "user", content: userMessage },
+		];
+	}
+
+	return [...conversationHistory, { role: "user", content: userMessage }];
+};
 
 export const runAgent = async (
 	userMessage: string,
@@ -28,11 +44,9 @@ export const runAgent = async (
 	const modelLimits = getModelLimits(DEFAULT_MODEL_ID);
 
 	let workingHistory = filterCompatibleMessages(conversationHistory);
-	const preCheckTokens = estimateMessagesTokens([
-		{ role: "system", content: SYSTEM_PROMPT },
-		...workingHistory,
-		{ role: "user", content: userMessage },
-	]);
+
+	const messages = getMessages(userMessage, workingHistory);
+	const preCheckTokens = estimateMessagesTokens(messages);
 
 	if (isOverThreshold(preCheckTokens.total, modelLimits.contextWindow)) {
 		workingHistory = await compactConversation(
@@ -40,12 +54,6 @@ export const runAgent = async (
 			DEFAULT_MODEL_ID,
 		);
 	}
-
-	const messages: ModelMessage[] = [
-		{ role: "system", content: SYSTEM_PROMPT },
-		...workingHistory,
-		{ role: "user", content: userMessage },
-	];
 
 	let fullResponse = "";
 
