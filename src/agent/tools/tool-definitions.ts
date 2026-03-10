@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const SQLITE_TOOL_DEFINITIONS: any = {
+export const SQLITE_TOOL_DEFINITIONS = {
 	addTask: {
 		description:
 			"Add a new task to the SQLite memory. Use this when the user wants to create, add, or save a task/todo.",

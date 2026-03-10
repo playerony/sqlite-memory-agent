@@ -16,7 +16,6 @@ import {
 	isOverThreshold,
 } from "./context";
 import { DEFAULT_MODEL_ID, DEFAULT_THRESHOLD } from "../config.js";
-import { executeTool } from "./executeTool.js";
 
 Laminar.initialize({
 	projectApiKey: process.env.LMNR_PROJECT_API_KEY,

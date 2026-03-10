@@ -1,6 +1,6 @@
 import { generateText, stepCountIs, tool, type ToolSet } from "ai";
 
-import { SQLITE_TOOL_DEFINITIONS } from "./tool-definitions/index.js";
+import { SQLITE_TOOL_DEFINITIONS } from "../src/agent/tools/tool-definitions.js";
 import type { EvalData } from "./types.js";
 import { buildMessages } from "./utils.js";
 import { anthropic } from "@ai-sdk/anthropic";
@@ -16,7 +16,7 @@ export const singleTurnExecutor = async (data: EvalData) => {
 		if (def) {
 			tools[toolName] = tool({
 				description: def.description,
-				inputSchema: def.parameters,
+				inputSchema: def.parameters as any,
 			});
 		}
 	}

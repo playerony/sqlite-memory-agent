@@ -1,31 +1,10 @@
 import { tool } from "ai";
-import { z } from "zod";
 import { getDb, type TaskRow, DB_PATH } from "../../db/index.js";
+import { SQLITE_TOOL_DEFINITIONS } from "./tool-definitions.js";
 
-// ── Add a new task ──────────────────────────────────────────────────────────
 export const addTask = tool({
-	description:
-		"Add a new task to the SQLite memory. Use this when the user wants to create, add, or save a task/todo.",
-	inputSchema: z.object({
-		title: z.string().describe("Short, clear title for the task"),
-		description: z
-			.string()
-			.optional()
-			.describe("Optional longer description or notes"),
-		priority: z
-			.enum(["low", "medium", "high"])
-			.optional()
-			.default("medium")
-			.describe("Task priority: low, medium, or high"),
-		due_date: z
-			.string()
-			.optional()
-			.describe("Optional due date in YYYY-MM-DD format"),
-		tags: z
-			.string()
-			.optional()
-			.describe('Optional comma-separated tags, e.g. "work,urgent"'),
-	}),
+	description: SQLITE_TOOL_DEFINITIONS.addTask.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.addTask.parameters,
 	execute: async ({ title, description, priority, due_date, tags }) => {
 		try {
 			const db = getDb();
@@ -47,31 +26,9 @@ export const addTask = tool({
 	},
 });
 
-// ── List tasks ───────────────────────────────────────────────────────────────
 export const listTasks = tool({
-	description:
-		"List tasks from the SQLite memory. Can filter by status, priority, or tags. Use this to show the user their current tasks.",
-	inputSchema: z.object({
-		status: z
-			.enum(["todo", "in_progress", "done", "all"])
-			.optional()
-			.default("all")
-			.describe("Filter by status. Defaults to all."),
-		priority: z
-			.enum(["low", "medium", "high", "all"])
-			.optional()
-			.default("all")
-			.describe("Filter by priority. Defaults to all."),
-		tag: z
-			.string()
-			.optional()
-			.describe('Optional tag to filter by (e.g. "work")'),
-		limit: z
-			.number()
-			.optional()
-			.default(50)
-			.describe("Maximum number of tasks to return"),
-	}),
+	description: SQLITE_TOOL_DEFINITIONS.listTasks.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.listTasks.parameters,
 	execute: async ({ status, priority, tag, limit }) => {
 		const db = getDb();
 
@@ -127,16 +84,9 @@ export const listTasks = tool({
 	},
 });
 
-// ── Update task status ───────────────────────────────────────────────────────
 export const updateTaskStatus = tool({
-	description:
-		"Update the status of a task. Use this to mark tasks as in_progress, done, or back to todo.",
-	inputSchema: z.object({
-		id: z.number().describe("The task ID to update"),
-		status: z
-			.enum(["todo", "in_progress", "done"])
-			.describe("The new status for the task"),
-	}),
+	description: SQLITE_TOOL_DEFINITIONS.updateTaskStatus.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.updateTaskStatus.parameters,
 	execute: async ({ id, status }) => {
 		const db = getDb();
 		const result = db
@@ -155,24 +105,9 @@ export const updateTaskStatus = tool({
 	},
 });
 
-// ── Update task details ──────────────────────────────────────────────────────
 export const updateTask = tool({
-	description:
-		"Update task details like title, description, priority, due date, or tags.",
-	inputSchema: z.object({
-		id: z.number().describe("The task ID to update"),
-		title: z.string().optional().describe("New title"),
-		description: z.string().optional().describe("New description"),
-		priority: z
-			.enum(["low", "medium", "high"])
-			.optional()
-			.describe("New priority"),
-		due_date: z
-			.string()
-			.optional()
-			.describe("New due date in YYYY-MM-DD format"),
-		tags: z.string().optional().describe("New comma-separated tags"),
-	}),
+	description: SQLITE_TOOL_DEFINITIONS.updateTask.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.updateTask.parameters,
 	execute: async ({ id, title, description, priority, due_date, tags }) => {
 		const db = getDb();
 
@@ -218,13 +153,9 @@ export const updateTask = tool({
 	},
 });
 
-// ── Delete a task ────────────────────────────────────────────────────────────
 export const deleteTask = tool({
-	description:
-		"Permanently delete a task from memory. Use this only when the user explicitly wants to remove a task.",
-	inputSchema: z.object({
-		id: z.number().describe("The task ID to delete"),
-	}),
+	description: SQLITE_TOOL_DEFINITIONS.deleteTask.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.deleteTask.parameters,
 	execute: async ({ id }) => {
 		const db = getDb();
 		const task = db.prepare("SELECT title FROM tasks WHERE id = ?").get(id) as
@@ -240,13 +171,9 @@ export const deleteTask = tool({
 	},
 });
 
-// ── Search tasks ─────────────────────────────────────────────────────────────
 export const searchTasks = tool({
-	description:
-		"Search tasks by keyword in title or description. Use this when the user wants to find specific tasks.",
-	inputSchema: z.object({
-		query: z.string().describe("Search keyword or phrase"),
-	}),
+	description: SQLITE_TOOL_DEFINITIONS.searchTasks.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.searchTasks.parameters,
 	execute: async ({ query }) => {
 		const db = getDb();
 		const pattern = `%${query}%`;
@@ -271,11 +198,9 @@ export const searchTasks = tool({
 	},
 });
 
-// ── Get DB info ──────────────────────────────────────────────────────────────
 export const getMemoryInfo = tool({
-	description:
-		"Get information about the SQLite memory database: total tasks, breakdown by status, and file location.",
-	inputSchema: z.object({}),
+	description: SQLITE_TOOL_DEFINITIONS.getMemoryInfo.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.getMemoryInfo.parameters,
 	execute: async () => {
 		const db = getDb();
 		const total = (

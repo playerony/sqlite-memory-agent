@@ -1,10 +1,9 @@
 import { tool } from "ai";
-import { z } from "zod";
+import { SQLITE_TOOL_DEFINITIONS } from "./tool-definitions.js";
 
 export const dateTime = tool({
-	description:
-		"Get the current date and time. Use this tool before any time related task.",
-	inputSchema: z.object({}),
+	description: SQLITE_TOOL_DEFINITIONS.dateTime.description,
+	inputSchema: SQLITE_TOOL_DEFINITIONS.dateTime.parameters,
 	execute: async () => {
 		return new Date().toISOString();
 	},

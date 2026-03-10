@@ -3,12 +3,10 @@ import InkSpinner from "ink-spinner";
 
 export interface ToolCallProps {
 	name: string;
-	args?: unknown;
 	status: "pending" | "complete";
-	result?: string;
 }
 
-export function ToolCall({ name, status, result }: ToolCallProps) {
+export function ToolCall({ name, status }: ToolCallProps) {
 	return (
 		<Box flexDirection="column" marginLeft={2}>
 			<Box>
@@ -27,14 +25,6 @@ export function ToolCall({ name, status, result }: ToolCallProps) {
 					<Text color="green"> ✓</Text>
 				)}
 			</Box>
-			{status === "complete" && result && (
-				<Box marginLeft={2}>
-					<Text dimColor>
-						→ {result.slice(0, 100)}
-						{result.length > 100 ? "..." : ""}
-					</Text>
-				</Box>
-			)}
 		</Box>
 	);
 }

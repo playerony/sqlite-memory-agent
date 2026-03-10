@@ -44,22 +44,21 @@ export function App() {
 					onToken: (token) => {
 						setStreamingText((prev) => prev + token);
 					},
-					onToolCallStart: (name, args) => {
+					onToolCallStart: (name) => {
 						setActiveToolCalls((prev) => [
 							...prev,
 							{
 								id: `${name}-${Date.now()}`,
 								name,
-								args,
 								status: "pending",
 							},
 						]);
 					},
-					onToolCallEnd: (name, result) => {
+					onToolCallEnd: (name) => {
 						setActiveToolCalls((prev) =>
 							prev.map((tc) =>
 								tc.name === name && tc.status === "pending"
-									? { ...tc, status: "complete", result }
+									? { ...tc, status: "complete" }
 									: tc,
 							),
 						);
@@ -121,13 +120,7 @@ export function App() {
 				{activeToolCalls.length > 0 && (
 					<Box flexDirection="column" marginTop={1}>
 						{activeToolCalls.map((tc) => (
-							<ToolCall
-								key={tc.id}
-								name={tc.name}
-								args={tc.args}
-								status={tc.status}
-								result={tc.result}
-							/>
+							<ToolCall key={tc.id} name={tc.name} status={tc.status} />
 						))}
 					</Box>
 				)}
